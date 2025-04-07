@@ -7,6 +7,7 @@ from llm import LLM
 from langchain_tavily import TavilySearch
 # from react_agent import ReActAgent
 import torch, os
+from reflection import build_self_reflective_agent
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
@@ -55,10 +56,10 @@ def preprocessing():
             verbose = True,
             handle_parsing_errors=True
     )
-    return llm, agent
+    return llm, agent, tool, prompt
 
-llm, agent = preprocessing()
-
+llm, agent, tool, prompt = preprocessing()
+reflect_and_react = build_self_reflective_agent(llm, tool, prompt)
 
 st.title("Reasoning AI")
 
@@ -68,31 +69,34 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Enter your question here..."):
+if user_prompt := st.chat_input("Enter your question here..."):
     # Display user message in chat message container
 
     col1, col2, col3 = st.columns(spec = ([1,2,1]), border = True, gap = "large")
     with col1:
         st.subheader("Base Model")
         with st.chat_message("user"):
-            st.write(prompt)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        resp = llm.invoke(prompt)
+            st.write(user_prompt)
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
+        resp = llm.invoke(user_prompt)
         with st.chat_message("Base Model"):
             st.write(resp.content)
-        # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": resp.content})
+
     with col2:
         st.subheader("Out of Box ReAct Agent")
         with st.chat_message("user"):
-            st.write(prompt)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        resp = agent.invoke({"input":prompt})
+            st.write(user_prompt)
+        resp = agent.invoke({"input": user_prompt})
         with st.chat_message("ReAct Agent"):
             st.write(resp.get("output"))
             with st.expander("Reasoning Steps:"):
                 st.write(resp.get("intermediate_steps"))
-        # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
+    with col3:
+        st.subheader("Self-Reflective Agent")
+        final_response, reflection = reflect_and_react(user_prompt)
+        st.chat_message("Reflective Agent").write(final_response.get("output"))
+        with st.expander("Reflection"):
+            st.markdown(reflection)
+        st.session_state.messages.append({"role": "assistant", "content": final_response.get("output")})
