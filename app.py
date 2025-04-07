@@ -94,9 +94,15 @@ if user_prompt := st.chat_input("Enter your question here..."):
                 st.write(resp.get("intermediate_steps"))
         st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
     with col3:
-        st.subheader("Self-Reflective Agent")
-        final_response, reflection = reflect_and_react(user_prompt)
-        st.chat_message("Reflective Agent").write(final_response.get("output"))
-        with st.expander("Reflection"):
+        st.subheader("🧠 Self-Reflective Agent")
+        final_response, reflection, trace = reflect_and_react(user_prompt)
+
+        with st.chat_message("Reflective Agent"):
+            st.markdown("**🟡 Final Answer:**")
+            st.markdown(final_response.get("output"))
+
+        with st.expander("🔍 Reasoning Trace"):
+            st.markdown(f"```text\n{trace}\n```")
+
+        with st.expander("🪞 Reflection"):
             st.markdown(reflection)
-        st.session_state.messages.append({"role": "assistant", "content": final_response.get("output")})

@@ -47,8 +47,8 @@ def build_self_reflective_agent(llm, tool, prompt):
         # Step 4: Conditional re-run
         if "issue" in reflection_text.lower() or "mistake" in reflection_text.lower():
             second_response = agent.invoke({"input": input_question})
-            return second_response, reflection_text
+            return second_response, reflection_text, trace_str
         else:
-            return response, reflection_text
+            return response, reflection_text, trace_str
 
     return reflect_and_react
