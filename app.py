@@ -43,7 +43,7 @@ def preprocessing():
         partial_variables = {"tool_names":tool.name, "tools":[tool]}
     )
     # prompt = hub.pull("hwchase17/react")
-    llm = LLM("mistralai/Mistral-7B-Instruct-v0.1")
+    llm = LLM()
     agent = AgentExecutor(
         agent = create_react_agent(
             llm.llm,
