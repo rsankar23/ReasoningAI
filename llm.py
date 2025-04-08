@@ -1,20 +1,23 @@
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+from langchain_openai import ChatOpenAI
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-
+HF_TOKEN = os.getenv("HUGGING_FACE_HUB_TOKEN")
 
 class LLM:
-    def __init__(self, repo_id = "microsoft/Phi-3-mini-4k-instruct"):
-        self.endpoint = HuggingFaceEndpoint(
+    def __init__(self, source = "HuggingFace", repo_id = "openai-community/gpt2"):
+        self.endpoint = {"HuggingFace":HuggingFaceEndpoint(
             repo_id = repo_id,
             task = "text-generation",
             do_sample = True,
             repetition_penalty = 1.03,
             # api_key = HF_TOKEN
-        )
+        )}
         self.llm = ChatHuggingFace(
-            llm = self.endpoint,
+            llm = self.endpoint[source],
             verbose=True
         )
         self.history = []

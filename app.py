@@ -7,8 +7,12 @@ from llm import LLM
 from langchain_tavily import TavilySearch
 # from react_agent import ReActAgent
 import torch, os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 
 @st.cache_resource
@@ -43,7 +47,7 @@ def preprocessing():
         partial_variables = {"tool_names":tool.name, "tools":[tool]}
     )
     # prompt = hub.pull("hwchase17/react")
-    llm = LLM("mistralai/Mistral-7B-Instruct-v0.1")
+    llm = LLM("MaziyarPanahi/Mistral-Small-Instruct-2409-GGUF")
     agent = AgentExecutor(
         agent = create_react_agent(
             llm.llm,
@@ -71,7 +75,7 @@ for message in st.session_state.messages:
 if prompt := st.chat_input("Enter your question here..."):
     # Display user message in chat message container
 
-    col1, col2, col3 = st.columns(spec = ([1,2,1]), border = True, gap = "large")
+    col1, col2, col3 = st.columns(spec = ([1,2, 1]), border = True, gap = "large")
     with col1:
         st.subheader("Base Model")
         with st.chat_message("user"):
