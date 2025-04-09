@@ -8,6 +8,7 @@ from langchain_tavily import TavilySearch
 # from react_agent import ReActAgent
 import torch, os
 from reflection import build_self_reflective_agent
+import evaluate_rgb
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
@@ -63,6 +64,17 @@ reflect_and_react = build_self_reflective_agent(llm, tool, prompt)
 
 st.title("Reasoning AI")
 
+with st.sidebar:
+    st.markdown("## 📊 Evaluate Agent on LLM-RGB")
+    if st.button("Run RGB Evaluation (10 samples)"):
+        with st.spinner("Running evaluation..."):
+            try:
+                data = evaluate_rgb.load_rgb_dataset()
+                acc = evaluate_rgb.evaluate_agent_on_rgb(data, max_samples=10)
+                st.success(f"✅ Accuracy: {acc:.2%}")
+            except Exception as e:
+                st.error(f"Evaluation failed: {e}")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 for message in st.session_state.messages:
@@ -106,3 +118,4 @@ if user_prompt := st.chat_input("Enter your question here..."):
 
         with st.expander("🪞 Reflection"):
             st.markdown(reflection)
+__all__ = ["reflect_and_react"]
