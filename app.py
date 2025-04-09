@@ -66,12 +66,25 @@ st.title("Reasoning AI")
 
 with st.sidebar:
     st.markdown("## 📊 Evaluate Agent on LLM-RGB")
-    if st.button("Run RGB Evaluation (10 samples)"):
+    if st.button("Run RGB Evaluation (10 samples)", key="rgb_eval_btn"):
         with st.spinner("Running evaluation..."):
             try:
                 data = evaluate_rgb.load_rgb_dataset()
-                acc = evaluate_rgb.evaluate_agent_on_rgb(data, max_samples=10)
+                acc, wrongs = evaluate_rgb.evaluate_agent_on_rgb(data, max_samples=10)
                 st.success(f"✅ Accuracy: {acc:.2%}")
+
+                st.image("accuracy_pie_chart.png", caption="Accuracy Breakdown")
+
+                if wrongs:
+                    st.markdown("### ❌ Wrong Predictions")
+                    for i, item in enumerate(wrongs):
+                        with st.expander(f"Example {i+1}"):
+                            st.markdown(f"""
+                            **Question:** {item['question']}  
+                            **Expected Answer:** {item['expected']}  
+                            **Agent Output:** {item['output']}  
+                            **Reflection:** {item['reflection']}  
+                            """)
             except Exception as e:
                 st.error(f"Evaluation failed: {e}")
 
