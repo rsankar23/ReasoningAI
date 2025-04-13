@@ -15,10 +15,11 @@ load_dotenv()
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
-
+INDEX = 1
 @st.cache_resource
 def preprocessing():
     tool = TavilySearch(max_results = 10)
+    
     template = """
             Answer the following questions as best you can. Do not search unrelated topics beyond the scope of the user query. You must be able to reasonably explain why the topic you searched was related to the user question. You have access to the following tools:
 
@@ -49,7 +50,7 @@ def preprocessing():
     )
     # prompt = hub.pull("hwchase17/react")
     sources = ["HuggingFace", "Anthropic", "OpenAI"]
-    llm = LLM(source=sources[1])
+    llm = LLM(source=sources[INDEX])
     agent = AgentExecutor(
         agent = create_react_agent(
             llm.llm,
@@ -69,7 +70,7 @@ reflect_and_react = build_self_reflective_agent(llm, tool, prompt, max_reflectio
 st.title("Reasoning AI")
 
 with st.sidebar:
-    models = st.selectbox("Models Available", ["HuggingFace", "Anthropic", "OpenAI"])
+    models = st.selectbox("Models Available", ["HuggingFace", "Anthropic", "OpenAI"], index=INDEX)
     st.markdown("## 📊 Evaluate Agent on LLM-RGB")
     if st.button("Run RGB Evaluation (10 samples)", key="rgb_eval_btn"):
         with st.spinner("Running evaluation..."):
@@ -102,8 +103,8 @@ for message in st.session_state.messages:
 if user_prompt := st.chat_input("Enter your question here..."):
     # Display user message in chat message container
 
-    col1, col2, col3 = st.columns(spec = ([1,2,1]), border = True, gap = "large")
-    with col1:
+    # col1, col2, col3 = st.columns(spec = ([1,2,1]), border = True, gap = "large")
+    with st.container():
         st.subheader("Base Model")
         with st.chat_message("user"):
             st.write(user_prompt)
@@ -113,7 +114,7 @@ if user_prompt := st.chat_input("Enter your question here..."):
             st.write(resp.content)
         st.session_state.messages.append({"role": "assistant", "content": resp.content})
 
-    with col2:
+    with st.container():
         st.subheader("Out of Box ReAct Agent")
         with st.chat_message("user"):
             st.write(user_prompt)
@@ -123,14 +124,14 @@ if user_prompt := st.chat_input("Enter your question here..."):
             with st.expander("Reasoning Steps:"):
                 st.write(resp.get("intermediate_steps"))
         st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
-    with col3:
+    with st.container():
         st.subheader("🧠 Self-Reflective Agent")
 
         final_response, final_reflection, final_trace, all_reflections = reflect_and_react(
             user_prompt, collect_reflections=True
         )
 
-        with st.chat_message("Reflective Agent"):
+        with st.chat_message("🧠 Self-Reflective Agent"):
             st.markdown("**🟡 Final Answer:**")
             st.markdown(final_response.get("output"))
 
