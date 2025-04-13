@@ -9,6 +9,9 @@ from langchain_tavily import TavilySearch
 import torch, os
 from reflection import build_self_reflective_agent
 import evaluate_rgb
+from dotenv import load_dotenv
+
+load_dotenv()
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
@@ -45,7 +48,8 @@ def preprocessing():
         partial_variables = {"tool_names":tool.name, "tools":[tool]}
     )
     # prompt = hub.pull("hwchase17/react")
-    llm = LLM()
+    sources = ["HuggingFace", "Anthropic", "OpenAI"]
+    llm = LLM(source=sources[1])
     agent = AgentExecutor(
         agent = create_react_agent(
             llm.llm,
@@ -65,6 +69,7 @@ reflect_and_react = build_self_reflective_agent(llm, tool, prompt, max_reflectio
 st.title("Reasoning AI")
 
 with st.sidebar:
+    models = st.selectbox("Models Available", ["HuggingFace", "Anthropic", "OpenAI"])
     st.markdown("## 📊 Evaluate Agent on LLM-RGB")
     if st.button("Run RGB Evaluation (10 samples)", key="rgb_eval_btn"):
         with st.spinner("Running evaluation..."):
