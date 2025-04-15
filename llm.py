@@ -12,7 +12,6 @@ class LLM:
             do_sample = True,
             repetition_penalty = 1.03,
             api_key = os.getenv("HUGGINGFACEHUB_API_TOKEN")
-            #
         )
         self.llm = ChatHuggingFace(
             llm = self.endpoint,
