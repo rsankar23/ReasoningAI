@@ -9,6 +9,7 @@ from langchain_tavily import TavilySearch
 import torch, os
 from reflection import build_self_reflective_agent
 import evaluate_rgb
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 

@@ -11,7 +11,7 @@ class LLM:
             task = "text-generation",
             do_sample = True,
             repetition_penalty = 1.03,
-            # api_key = HF_TOKEN
+            api_key = os.getenv("HUGGINGFACEHUB_API_TOKEN")
         )
         self.llm = ChatHuggingFace(
             llm = self.endpoint,
