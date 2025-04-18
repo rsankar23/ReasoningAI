@@ -38,7 +38,7 @@ def setup_reflect_agent():
         partial_variables={"tool_names": tool.name, "tools": [tool]}
     )
     llm = LLM()
-    return build_self_reflective_agent(llm, tool, template)
+    return build_self_reflective_agent(llm, tool, template, max_reflection_turns=3)
 
 
 def load_rgb_dataset(path="datasets/information_integration/test.json"):
@@ -62,9 +62,11 @@ def evaluate_agent_on_rgb(task_data, max_samples=10, save_path="eval_results.csv
 
         input_text = f"{context}\n\nQuestion: {question}"
         try:
-            response, reflection, trace = reflect_and_react(input_text)
+            response, reflection, trace, reflections = reflect_and_react(input_text, collect_reflections=True)
             output = response.get("output", "").lower()
             is_correct = expected in output
+            num_rounds = len(reflections)
+
             if is_correct:
                 correct += 1
             else:
@@ -73,7 +75,8 @@ def evaluate_agent_on_rgb(task_data, max_samples=10, save_path="eval_results.csv
                     "context": context,
                     "expected": expected,
                     "output": output,
-                    "reflection": reflection
+                    "reflection": reflection,
+                    "reflection_rounds": num_rounds
                 })
 
             all_results.append({
@@ -81,7 +84,8 @@ def evaluate_agent_on_rgb(task_data, max_samples=10, save_path="eval_results.csv
                 "expected": expected,
                 "output": output,
                 "reflection": reflection,
-                "correct": is_correct
+                "correct": is_correct,
+                "reflection_rounds": num_rounds
             })
 
         except Exception as e:

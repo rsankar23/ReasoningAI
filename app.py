@@ -9,7 +9,6 @@ from langchain_tavily import TavilySearch
 import torch, os
 from reflection import build_self_reflective_agent
 import evaluate_rgb
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
 
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
@@ -61,7 +60,7 @@ def preprocessing():
     return llm, agent, tool, prompt
 
 llm, agent, tool, prompt = preprocessing()
-reflect_and_react = build_self_reflective_agent(llm, tool, prompt)
+reflect_and_react = build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=5)
 
 st.title("Reasoning AI")
 
