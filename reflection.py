@@ -3,7 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.agents import AgentAction
 
 
-def build_self_reflective_agent(llm, tool, prompt):
+def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
     agent = AgentExecutor(
         agent=create_react_agent(llm.llm, tools=[tool], prompt=prompt),
         tools=[tool],

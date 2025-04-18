@@ -60,7 +60,7 @@ def preprocessing():
     return llm, agent, tool, prompt
 
 llm, agent, tool, prompt = preprocessing()
-reflect_and_react = build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=5)
+reflect_and_react = build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3)
 
 st.title("Reasoning AI")
 
