@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class LLM:
-    def __init__(self, repo_id = "microsoft/Phi-3-mini-4k-instruct", source:str = "Anthropic"):
+    def __init__(self, repo_id = "meta-llama/Llama-3.2-11B-Vision", source:str = "Anthropic"):
         self.endpoint = HuggingFaceEndpoint(
             repo_id = repo_id,
             task = "text-generation",

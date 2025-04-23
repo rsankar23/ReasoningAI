@@ -103,7 +103,6 @@ for message in st.session_state.messages:
 if user_prompt := st.chat_input("Enter your question here..."):
     # Display user message in chat message container
 
-    # col1, col2, col3 = st.columns(spec = ([1,2,1]), border = True, gap = "large")
     with st.container():
         st.subheader("Base Model")
         with st.chat_message("user"):
