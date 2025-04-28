@@ -127,8 +127,8 @@ if user_prompt := st.chat_input("Enter your question here..."):
     with st.container():
         st.subheader("🧠 Self-Reflective Agent")
 
-        final_response, final_reflection, final_trace, all_reflections = reflect_and_react(
-            user_prompt, collect_reflections=True
+        final_response, final_reflection, final_trace = reflect_and_react(
+            user_prompt
         )
 
         with st.chat_message("🧠 Self-Reflective Agent"):
@@ -138,12 +138,12 @@ if user_prompt := st.chat_input("Enter your question here..."):
         with st.expander("🔍 Reasoning Trace (Final Round)"):
             st.markdown(f"```text\n{final_trace}\n```")
 
-        with st.expander("🪞 Reflection Rounds"):
-            for r in all_reflections:
-                with st.expander(f"🔁 Round {r['attempt']}"):
-                    st.markdown("**Trace:**")
-                    st.markdown(f"```text\n{r['trace']}\n```")
-                    st.markdown("**Reflection:**")
-                    st.markdown(r["reflection"])
+        # with st.expander("🪞 Reflection Rounds"):
+        #     for r in all_reflections:
+        #         with st.expander(f"🔁 Round {r['attempt']}"):
+        #             st.markdown("**Trace:**")
+        #             st.markdown(f"```text\n{r['trace']}\n```")
+        #             st.markdown("**Reflection:**")
+        #             st.markdown(r["reflection"])
 
 __all__ = ["reflect_and_react"]

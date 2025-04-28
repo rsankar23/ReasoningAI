@@ -1,12 +1,16 @@
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor
+from langgraph.prebuilt import create_react_agent
 from langchain_core.prompts import PromptTemplate
 from langchain_core.agents import AgentAction
-
+from memory import MemoryModule
 
 def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
+    memory = MemoryModule(llm=llm)
+    tools = memory.get_react_tools()
+    tools.append(tool)
     agent = AgentExecutor(
-        agent=create_react_agent(llm.llm, tools=[tool], prompt=prompt),
-        tools=[tool],
+        agent=create_react_agent(llm.llm, tools=tools, prompt=prompt),
+        tools=tools,
         return_intermediate_steps=True,
         verbose=True,
         handle_parsing_errors=True
