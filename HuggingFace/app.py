@@ -9,9 +9,11 @@ load_dotenv()
 torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
 INDEX = 1
+MAX_REASONING = 15
+DEFAULT_PLANNING_NUM = 5
 @st.cache_resource
 def preprocessing():
-    llm = LLM().llm
+    llm = LLM().get_llm()
     agent = ReactAgent()
 
     return llm, agent
@@ -46,6 +48,17 @@ with st.sidebar:
                 #             """)
             except Exception as e:
                 st.error(f"Evaluation failed: {e}")
+    num_max_steps = st.select_slider(
+        label="Slide to select the max number of tool invocations",
+        options = list(range(1,MAX_REASONING+1)),
+        value=DEFAULT_PLANNING_NUM
+    )
+    num_planning_steps = st.select_slider(
+        label="Slide to select the planning step interval",
+        options = list(range(1,MAX_REASONING+1)),
+        value=DEFAULT_PLANNING_NUM
+    )
+    
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -55,24 +68,27 @@ for message in st.session_state.messages:
 
 if user_prompt := st.chat_input("Enter your question here..."):
     # Display user message in chat message container
-
+    
     with st.container():
         st.subheader("Base Model")
         with st.chat_message("user"):
             st.write(user_prompt)
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         resp = llm(st.session_state.messages)
-        st.session_state.messages.append({"role": "assistant", "content": resp.content})
+        st.session_state.messages.append({"role": "assistant", "content": [resp.content]})
         with st.chat_message("Base Model"):
             st.write(resp.content)
     with st.container():
         st.subheader("Out of Box ReAct Agent")
         with st.chat_message("user"):
             st.write(user_prompt)
-        
+        agent.set_planning_interval(num_planning_steps)
+        agent.set_max_planning_steps(num_max_steps)
         resp = agent.run(user_prompt)
-        st.session_state.messages.append({"role": "assistant", "content": resp})
+        st.session_state.messages.append({"role": "assistant", "content": [resp]})
         with st.chat_message("ReAct Agent"):
             st.write(resp)
+            with st.expander("ReAct Execution Efficiency:"):
+                st.line_chart(agent.get_react_time_efficiency(), x="Steps", y="Time to Execute")
             with st.expander("Reasoning Steps:"):
                 st.write(agent.get_memory())
