@@ -17,7 +17,7 @@ def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
             prompt=prompt
         ),
         tools=[tool],
-        memory=memory,  # ✅ 加入 memory
+        memory=memory,  # ✅ 挂载 memory 到 agent
         return_intermediate_steps=True,
         verbose=True,
         handle_parsing_errors=True
@@ -61,9 +61,10 @@ def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
                 trace_str += f"Observation: {step}\n"
 
         # 反思
+        chat_history = agent.memory.buffer_as_str()
         reflection = llm.invoke(reflection_prompt.format(
             agent_trace=trace_str,
-            chat_history=memory.load_memory_variables({})["chat_history"]
+            chat_history=chat_history
         ))
         reflection_text = reflection.content.strip()
         

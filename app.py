@@ -245,9 +245,10 @@ if user_prompt := st.chat_input("Enter your question here..."):
                 st.markdown(r["reflection"])
                 st.markdown("---")  # 添加分隔线分隔不同轮次
 
-        with st.expander("🧠 Conversation Memory"):
-            history_text = agent.memory.buffer_as_str()
-            st.markdown(f"```text\n{history_text}\n```")
+        if hasattr(agent, "memory") and agent.memory is not None:
+            with st.expander("🧠 Conversation Memory"):
+                history_text = agent.memory.buffer_as_str()
+                st.markdown(f"```text\n{history_text}\n```")
 
 
 
