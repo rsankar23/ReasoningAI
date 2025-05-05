@@ -11,9 +11,13 @@ def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
     )
 
     agent = AgentExecutor(
-        agent=create_react_agent(llm.llm, tools=[tool], prompt=prompt),
+        agent=create_react_agent(
+            llm.llm,
+            tools=[tool],
+            prompt=prompt
+        ),
         tools=[tool],
-        memory=memory,  # ✅ 加入记忆
+        memory=memory,  # ✅ 加入 memory
         return_intermediate_steps=True,
         verbose=True,
         handle_parsing_errors=True
