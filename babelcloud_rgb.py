@@ -167,7 +167,7 @@ class BabelCloudRGB:
         self.update_config_for_agent()
         
         # 执行评估
-        st.info("正在运行 LLM-RGB 对自反思代理的评估...")
+        st.info("Running LLM-RGB evaluation of self-reflective agents...")
         result = subprocess.run(
             ["npm", "run", "eval"],
             cwd=str(self.llm_rgb_path),
@@ -176,11 +176,11 @@ class BabelCloudRGB:
         )
         
         if result.returncode != 0:
-            st.error(f"评估失败: {result.stderr}")
+            st.error(f"Evaluation Failure: {result.stderr}")
             return None
         
         # 生成报告
-        st.info("正在生成报告...")
+        st.info("Generating report...")
         result = subprocess.run(
             ["npm", "run", "render"],
             cwd=str(self.llm_rgb_path),
@@ -189,13 +189,13 @@ class BabelCloudRGB:
         )
         
         if result.returncode != 0:
-            st.error(f"报告生成失败: {result.stderr}")
+            st.error(f"Report generation failed: {result.stderr}")
             return None
         
-        # 查找最新的实验目录
+
         experiment_dirs = list(self.output_dir.glob("*"))
         if not experiment_dirs:
-            st.error("未找到评估结果")
+            st.error("No evaluation results found")
             return None
             
         latest_experiment = max(experiment_dirs, key=os.path.getctime)
@@ -205,14 +205,14 @@ class BabelCloudRGB:
     def _ensure_llm_rgb_repo(self):
     #"""确保 LLM-RGB 仓库存在，不存在则克隆"""
       if not self.llm_rgb_path.exists():
-          st.info("正在克隆 LLM-RGB 仓库，请稍候...")
+          st.info("Cloning LLM-RGB repository, please wait...")
           subprocess.run(
               ["git", "clone", "https://github.com/babelcloud/LLM-RGB.git", str(self.llm_rgb_path)],
               check=True
           )
           
           # 安装依赖
-          st.info("正在安装依赖...")
+          st.info("Installing dependencies...")
           subprocess.run(
               ["npm", "install"], 
               cwd=str(self.llm_rgb_path),
