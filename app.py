@@ -235,14 +235,7 @@ if user_prompt := st.chat_input("Enter your question here..."):
 
         with st.expander("🔍 Reasoning Trace (Final Round)"):
             st.markdown(f"```text\n{final_trace}\n```")
-        # 原来的样子
-        # with st.expander("🪞 Reflection Rounds"):
-        #     for r in all_reflections:
-        #         with st.expander(f"🔁 Round {r['attempt']}"):
-        #             st.markdown("**Trace:**")
-        #             st.markdown(f"```text\n{r['trace']}\n```")
-        #             st.markdown("**Reflection:**")
-        #             st.markdown(r["reflection"])
+
 
         with st.expander("🪞 Reflection Rounds"):
             for r in all_reflections:
