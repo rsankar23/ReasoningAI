@@ -130,19 +130,38 @@ if user_prompt := st.chat_input("Enter your question here..."):
             user_prompt, collect_reflections=True
         )
 
+        # 在这行代码后面立即添加调试输出
+        # st.write("DEBUG - final_trace 类型:", type(final_trace))
+        # st.write("DEBUG - final_trace 长度:", len(final_trace) if final_trace else 0)
+        # st.write("DEBUG - all_reflections 类型:", type(all_reflections))
+        # st.write("DEBUG - all_reflections 长度:", len(all_reflections) if all_reflections else 0)
+        # if all_reflections and len(all_reflections) > 0:
+        #     st.write("DEBUG - 第一个反思的trace长度:", len(all_reflections[0]['trace']) if all_reflections[0]['trace'] else 0)
+
         with st.chat_message("🧠 Self-Reflective Agent"):
             st.markdown("**🟡 Final Answer:**")
             st.markdown(final_response.get("output"))
 
         with st.expander("🔍 Reasoning Trace (Final Round)"):
             st.markdown(f"```text\n{final_trace}\n```")
+        # 原来的样子
+        # with st.expander("🪞 Reflection Rounds"):
+        #     for r in all_reflections:
+        #         with st.expander(f"🔁 Round {r['attempt']}"):
+        #             st.markdown("**Trace:**")
+        #             st.markdown(f"```text\n{r['trace']}\n```")
+        #             st.markdown("**Reflection:**")
+        #             st.markdown(r["reflection"])
 
         with st.expander("🪞 Reflection Rounds"):
             for r in all_reflections:
-                with st.expander(f"🔁 Round {r['attempt']}"):
-                    st.markdown("**Trace:**")
-                    st.markdown(f"```text\n{r['trace']}\n```")
-                    st.markdown("**Reflection:**")
-                    st.markdown(r["reflection"])
+                st.markdown(f"### 🔁 Round {r['attempt']}")
+                st.markdown("**Trace:**")
+                st.markdown(f"```text\n{r['trace']}\n```")
+                st.markdown("**Reflection:**")
+                st.markdown(r["reflection"])
+                st.markdown("---")  # 添加分隔线分隔不同轮次
+
+
 
 __all__ = ["reflect_and_react"]
