@@ -30,7 +30,7 @@ jsonpointer==3.0.0
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
 langchain==0.3.25
-langchain-anthropic==0.3.14
+langchain-anthropic==0.3.12
 langchain-openai==0.3.16
 anthropic==0.50.0
 openai==1.76.0
