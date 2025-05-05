@@ -17,7 +17,6 @@ import traceback
 
 load_dotenv()
 
-torch.classes.__path__ = [] # add this line to manually set it to empty. 
 
 INDEX = 1
 @st.cache_resource

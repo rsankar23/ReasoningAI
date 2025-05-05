@@ -60,7 +60,8 @@ def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
         reflection = llm.invoke(reflection_prompt.format(
             agent_trace=trace_str,
             chat_history=memory.load_memory_variables({})["chat_history"]
-        ))        reflection_text = reflection.content.strip()
+        ))
+        reflection_text = reflection.content.strip()
         
         # 记录这轮反思（如果需要）
         if collect_reflections:
