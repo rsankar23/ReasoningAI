@@ -52,6 +52,13 @@ def build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3):
         response = agent.invoke({"input": input_question})
         trace = response.get("intermediate_steps", [])
 
+        # # 添加调试打印
+        # print("DEBUG - Response keys:", list(response.keys()))
+        # print("DEBUG - Intermediate steps type:", type(response.get("intermediate_steps", [])))
+        # print("DEBUG - Intermediate steps length:", len(response.get("intermediate_steps", [])))
+        
+        # trace = response.get("intermediate_steps", [])
+
         # 格式化轨迹
         trace_str = ""
         for step in trace:

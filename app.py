@@ -11,7 +11,7 @@ from reflection import build_self_reflective_agent
 import evaluate_rgb
 from dotenv import load_dotenv
 
-# 在 app.py 文件中添加以下导入
+# Add the following import in app.py
 from babelcloud_rgb import BabelCloudRGB
 import traceback
 
@@ -23,8 +23,13 @@ INDEX = 1
 def preprocessing():
     tool = TavilySearch(max_results = 10)
     
+    # Modify template to strongly encourage showing reasoning
     template = """
-            Answer the following questions as best you can. Do not search unrelated topics beyond the scope of the user query. You must be able to reasonably explain why the topic you searched was related to the user question. You have access to the following tools:
+            Answer the following questions as best you can. 
+            ALWAYS show your detailed step-by-step reasoning for every question.
+            Break down each problem into smaller steps and show how you solve each step.
+            You must be able to reasonably explain why the topic you searched was related to the user question.
+            You have access to the following tools:
 
         {tools}
 
@@ -43,15 +48,15 @@ def preprocessing():
 
         Question: {input}
         Thought:{agent_scratchpad}
-
     """
-    working = "You are a digital assistant tasked with responding to users questions while referencing the ultimate resource; the internet. Make the relevant focused topical searches based on the users query. Leverage the {tools} tools with the names {tool_names} at every interaction. The query is: {query}; Leverage the space here to provide your structured, reasoned thoughts, {agent_scratchpad}"    
+    
     prompt = PromptTemplate(
         template = template,
         input_variables = ["input", "agent_scratchpad"],
-        partial_variables = {"tool_names":tool.name, "tools":[tool]}
+        partial_variables = {"tool_names": tool.name, "tools": [tool]}
     )
-    # prompt = hub.pull("hwchase17/react")
+    
+    # Rest of your code
     sources = ["HuggingFace", "Anthropic", "OpenAI"]
     llm = LLM(source=sources[INDEX])
     agent = AgentExecutor(
@@ -61,11 +66,12 @@ def preprocessing():
             prompt = prompt
         ),
         return_intermediate_steps = True,
-            tools = [tool],
-            verbose = True,
-            handle_parsing_errors=True
+        tools = [tool],
+        verbose = True,
+        handle_parsing_errors=True
     )
     return llm, agent, tool, prompt
+
 
 llm, agent, tool, prompt = preprocessing()
 reflect_and_react = build_self_reflective_agent(llm, tool, prompt, max_reflection_turns=3)
@@ -77,32 +83,32 @@ with st.sidebar:
     
     st.markdown("## 📊 Evaluate Agent on LLM-RGB")
     
-    # 添加测试用例数量选择
+    # Add test case quantity selection
     num_test_cases = st.slider("Number of test cases", min_value=1, max_value=20, value=5, 
                             help="Select how many random test cases to evaluate")
     
     if st.button("Run RGB Evaluation", key="rgb_eval_btn"):
         with st.spinner(f"Running evaluation on {num_test_cases} random test cases..."):
             try:
-                # 使用用户选择的数量随机抽样
+                # Use user-selected quantity for random sampling
                 data = evaluate_rgb.load_llm_rgb_testcases(random_sample=num_test_cases)
-                # 评估所有加载的测试用例
+                # Evaluate all loaded test cases
                 acc, wrongs = evaluate_rgb.evaluate_agent_on_testcases(data, max_samples=None)
                 
                 st.success(f"✅ Accuracy: {acc:.2%}")
 
-                # 显示生成的图表
+                # Display generated chart
                 st.image("accuracy_pie_chart.png", caption="Accuracy Breakdown")
                 
-                # 如果生成了反思轮数分布图，显示它
+                # If reflection rounds distribution chart was generated, display it
                 if os.path.exists("reflection_rounds_distribution.png"):
                     st.image("reflection_rounds_distribution.png", caption="Reflection Rounds Distribution")
                 
-                # 如果生成了推理深度准确率图，显示它
+                # If reasoning depth accuracy chart was generated, display it
                 if os.path.exists("accuracy_by_reasoning_depth.png"):
                     st.image("accuracy_by_reasoning_depth.png", caption="Accuracy by Reasoning Depth")
                 
-                # 提供HTML报告的链接
+                # Provide link to HTML report
                 if os.path.exists("reflection_eval_report.html"):
                     st.markdown("[📄 View Detailed Evaluation Report](reflection_eval_report.html)")
 
@@ -126,41 +132,41 @@ with st.sidebar:
                 st.code(traceback.format_exc(), language="python")
 
     st.markdown("---")
-    st.markdown("## 🧠 评估自反思代理")
-    st.markdown("使用 LLM-RGB 基准评估您的自反思代理实现")
+    st.markdown("## 🧠 Evaluate Self-Reflection Agent")
+    st.markdown("Evaluate your self-reflection agent implementation using the LLM-RGB benchmark")
     
-    # 选择测试用例数量
-    test_count = st.slider("测试用例数量", min_value=5, max_value=15, value=10)
+    # Select number of test cases
+    test_count = st.slider("Number of test cases", min_value=5, max_value=15, value=10)
     
-    # 评估按钮
-    if st.button("评估自反思代理", key="eval_reflection_agent"):
-        with st.spinner("正在评估自反思代理..."):
+    # Evaluation button
+    if st.button("Evaluate Self-Reflection Agent", key="eval_reflection_agent"):
+        with st.spinner("Evaluating self-reflection agent..."):
             try:
-                # 初始化 LLM-RGB 评估器，传入自反思代理
+                # Initialize LLM-RGB evaluator, pass in self-reflection agent
                 evaluator = BabelCloudRGB(agent=reflect_and_react)
                 
-                # 运行针对代理的评估
+                # Run evaluation on the agent
                 experiment_dir = evaluator.run_agent_evaluation()
                 
                 if experiment_dir:
-                    # 解析结果
+                    # Parse results
                     results = evaluator.parse_results(experiment_dir)
                     
-                    # 显示结果
-                    st.success("评估完成！")
+                    # Display results
+                    st.success("Evaluation complete!")
                     
-                    # 创建性能概览
-                    st.subheader("自反思代理性能概览")
+                    # Create performance overview
+                    st.subheader("Self-Reflection Agent Performance Overview")
                     
-                    # 这里需要根据实际结果格式调整
+                    # Adjust this according to actual result format
                     metrics = {
-                        "推理深度": results.get("reasoning_depth", 0),
-                        "自我反思次数": results.get("reflection_rounds", 0),
-                        "正确性": results.get("accuracy", 0),
-                        "总分": results.get("total_score", 0)
+                        "Reasoning Depth": results.get("reasoning_depth", 0),
+                        "Self-Reflection Count": results.get("reflection_rounds", 0),
+                        "Accuracy": results.get("accuracy", 0),
+                        "Total Score": results.get("total_score", 0)
                     }
                     
-                    # 显示指标
+                    # Display metrics
                     col1, col2 = st.columns(2)
                     for i, (metric, value) in enumerate(metrics.items()):
                         if i % 2 == 0:
@@ -168,20 +174,20 @@ with st.sidebar:
                         else:
                             col2.metric(metric, f"{value:.2f}")
                     
-                    # 显示详细评估结果
-                    st.subheader("测试用例详细结果")
+                    # Display detailed evaluation results
+                    st.subheader("Test Case Detailed Results")
                     for i, test_case in enumerate(results.get("test_cases", [])):
-                        with st.expander(f"测试用例 {i+1}: {test_case.get('name', '未命名')}"):
-                            st.markdown(f"**提示**: {test_case.get('prompt', '')}")
-                            st.markdown(f"**预期答案**: {test_case.get('expected', '')}")
-                            st.markdown(f"**代理输出**: {test_case.get('output', '')}")
-                            st.markdown(f"**反思过程**: {test_case.get('reflection', '')}")
-                            st.markdown(f"**得分**: {test_case.get('score', 0)}/100")
+                        with st.expander(f"Test Case {i+1}: {test_case.get('name', 'Unnamed')}"):
+                            st.markdown(f"**Prompt**: {test_case.get('prompt', '')}")
+                            st.markdown(f"**Expected Answer**: {test_case.get('expected', '')}")
+                            st.markdown(f"**Agent Output**: {test_case.get('output', '')}")
+                            st.markdown(f"**Reflection Process**: {test_case.get('reflection', '')}")
+                            st.markdown(f"**Score**: {test_case.get('score', 0)}/100")
                 else:
-                    st.error("评估未返回有效结果")
+                    st.error("Evaluation did not return valid results")
             except Exception as e:
-                st.error(f"评估失败: {str(e)}")
-                st.error(f"详细错误: {traceback.format_exc()}")
+                st.error(f"Evaluation failed: {str(e)}")
+                st.error(f"Detailed error: {traceback.format_exc()}")
 
                 
 if "messages" not in st.session_state:
@@ -213,6 +219,25 @@ if user_prompt := st.chat_input("Enter your question here..."):
             with st.expander("Reasoning Steps:"):
                 st.write(resp.get("intermediate_steps"))
         st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
+
+        #############################
+        # 添加这些调试代码 DEBUG code
+        # st.write("Debug - Raw response object type:")
+        # st.write(type(resp))
+        # st.write("Debug - Response keys:")
+        # st.write(list(resp.keys()))
+        # st.write("Debug - Raw intermediate steps:")
+        # st.write(resp.get("intermediate_steps"))
+
+        # with st.chat_message("ReAct Agent"):
+        #     st.write(resp.get("output"))
+        #     with st.expander("Reasoning Steps:"):
+        #         st.write(resp.get("intermediate_steps"))
+        # st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
+
+
+
+
     with st.container():
         st.subheader("🧠 Self-Reflective Agent")
 
@@ -220,13 +245,25 @@ if user_prompt := st.chat_input("Enter your question here..."):
             user_prompt, collect_reflections=True
         )
 
-        # 在这行代码后面立即添加调试输出
-        # st.write("DEBUG - final_trace 类型:", type(final_trace))
-        # st.write("DEBUG - final_trace 长度:", len(final_trace) if final_trace else 0)
-        # st.write("DEBUG - all_reflections 类型:", type(all_reflections))
-        # st.write("DEBUG - all_reflections 长度:", len(all_reflections) if all_reflections else 0)
-        # if all_reflections and len(all_reflections) > 0:
-        #     st.write("DEBUG - 第一个反思的trace长度:", len(all_reflections[0]['trace']) if all_reflections[0]['trace'] else 0)
+        ####################################
+        # 添加这些调试代码 DEBUGcode
+        # st.write("Debug - Final response type:")
+        # st.write(type(final_response))
+        # st.write("Debug - Final response keys:")
+        # st.write(list(final_response.keys() if hasattr(final_response, 'keys') else []))
+        # st.write("Debug - Final trace type and length:")
+        # st.write(type(final_trace))
+        # st.write(len(final_trace) if isinstance(final_trace, str) else "Not a string")
+        # st.write("Debug - All reflections count:")
+        # st.write(len(all_reflections) if all_reflections else 0)
+        
+        # with st.chat_message("🧠 Self-Reflective Agent"):
+        #     st.markdown("**🟡 Final Answer:**")
+        #     st.markdown(final_response.get("output"))
+
+
+
+
 
         with st.chat_message("🧠 Self-Reflective Agent"):
             st.markdown("**🟡 Final Answer:**")
@@ -243,7 +280,7 @@ if user_prompt := st.chat_input("Enter your question here..."):
                 st.markdown(f"```text\n{r['trace']}\n```")
                 st.markdown("**Reflection:**")
                 st.markdown(r["reflection"])
-                st.markdown("---")  # 添加分隔线分隔不同轮次
+                st.markdown("---")  # Add separator between different rounds
 
         if hasattr(agent, "memory") and agent.memory is not None:
             with st.expander("🧠 Conversation Memory"):
