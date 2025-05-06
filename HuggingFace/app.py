@@ -92,3 +92,18 @@ if user_prompt := st.chat_input("Enter your question here..."):
                 st.line_chart(agent.get_react_time_efficiency(), x="Steps", y="Time to Execute")
             with st.expander("Reasoning Steps:"):
                 st.write(agent.get_memory())
+
+    with st.container():
+        st.subheader("Custom ReAct Agent")
+        with st.chat_message("user"):
+            st.write(user_prompt)
+        agent.set_planning_interval(num_planning_steps)
+        agent.set_max_planning_steps(num_max_steps)
+        resp = agent.run(user_prompt)
+        st.session_state.messages.append({"role": "assistant", "content": [resp]})
+        with st.chat_message("ReAct Agent"):
+            st.write(resp)
+            with st.expander("ReAct Execution Efficiency:"):
+                st.line_chart(agent.get_react_time_efficiency(), x="Steps", y="Time to Execute")
+            with st.expander("Reasoning Steps:"):
+                st.write(agent.get_memory())
