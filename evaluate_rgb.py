@@ -286,7 +286,7 @@ def evaluate_agent_on_testcases(test_data, max_samples=None, save_path="eval_res
                 "context": context[:50] + "..." if len(context) > 50 else context,
                 "expected": expected_answer,
                 "output": output[:100] + "..." if len(output) > 100 else output,
-                "correct": is_correct,
+                "is_correct": is_correct,  # Changed from 'correct' to 'is_correct'
                 "reflection_rounds": num_rounds,
                 "difficulty_score": difficulty_score,
                 "reasoning_depth": difficulties.get("reasoning-depth", 0) if difficulties else 0
@@ -326,7 +326,7 @@ def evaluate_agent_on_testcases(test_data, max_samples=None, save_path="eval_res
     # 绘制准确率与推理深度的关系
     if 'reasoning_depth' in df.columns:
         plt.figure(figsize=(10, 6))
-        accuracy_by_depth = df.groupby('reasoning_depth')['correct'].mean()
+        accuracy_by_depth = df.groupby('reasoning_depth')['is_correct'].mean()  # Changed from 'correct' to 'is_correct'
         counts_by_depth = df.groupby('reasoning_depth').size()
         
         plt.bar(accuracy_by_depth.index, accuracy_by_depth.values, color='lightgreen')
@@ -360,7 +360,7 @@ def generate_evaluation_report(df, output_path="reflection_eval_report.html"):
     """
     # 计算总体统计
     total_cases = len(df)
-    correct_cases = df['correct'].sum()
+    correct_cases = df['is_correct'].sum()  # Changed from 'correct' to 'is_correct'
     accuracy = correct_cases / total_cases if total_cases > 0 else 0
     avg_reflection_rounds = df['reflection_rounds'].mean()
     
@@ -433,8 +433,8 @@ def generate_evaluation_report(df, output_path="reflection_eval_report.html"):
     """
     
     for i, row in df.iterrows():
-        result_class = "correct" if row['correct'] else "incorrect"
-        result_text = "✓ Correct" if row['correct'] else "✗ Incorrect"
+        result_class = "correct" if row['is_correct'] else "incorrect"  # Changed from 'correct' to 'is_correct'
+        result_text = "✓ Correct" if row['is_correct'] else "✗ Incorrect"  # Changed from 'correct' to 'is_correct'
         
         html_content += f"""
         <tr>

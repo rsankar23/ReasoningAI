@@ -11,10 +11,6 @@ from reflection import build_self_reflective_agent
 import evaluate_rgb
 from dotenv import load_dotenv
 
-# Add the following import in app.py
-from babelcloud_rgb import BabelCloudRGB
-import traceback
-
 load_dotenv()
 
 
@@ -131,64 +127,6 @@ with st.sidebar:
                 import traceback
                 st.code(traceback.format_exc(), language="python")
 
-    st.markdown("---")
-    st.markdown("## 🧠 Evaluate Self-Reflection Agent")
-    st.markdown("Evaluate your self-reflection agent implementation using the LLM-RGB benchmark")
-    
-    # Select number of test cases
-    test_count = st.slider("Number of test cases", min_value=5, max_value=15, value=10)
-    
-    # Evaluation button
-    if st.button("Evaluate Self-Reflection Agent", key="eval_reflection_agent"):
-        with st.spinner("Evaluating self-reflection agent..."):
-            try:
-                # Initialize LLM-RGB evaluator, pass in self-reflection agent
-                evaluator = BabelCloudRGB(agent=reflect_and_react)
-                
-                # Run evaluation on the agent
-                experiment_dir = evaluator.run_agent_evaluation()
-                
-                if experiment_dir:
-                    # Parse results
-                    results = evaluator.parse_results(experiment_dir)
-                    
-                    # Display results
-                    st.success("Evaluation complete!")
-                    
-                    # Create performance overview
-                    st.subheader("Self-Reflection Agent Performance Overview")
-                    
-                    # Adjust this according to actual result format
-                    metrics = {
-                        "Reasoning Depth": results.get("reasoning_depth", 0),
-                        "Self-Reflection Count": results.get("reflection_rounds", 0),
-                        "Accuracy": results.get("accuracy", 0),
-                        "Total Score": results.get("total_score", 0)
-                    }
-                    
-                    # Display metrics
-                    col1, col2 = st.columns(2)
-                    for i, (metric, value) in enumerate(metrics.items()):
-                        if i % 2 == 0:
-                            col1.metric(metric, f"{value:.2f}")
-                        else:
-                            col2.metric(metric, f"{value:.2f}")
-                    
-                    # Display detailed evaluation results
-                    st.subheader("Test Case Detailed Results")
-                    for i, test_case in enumerate(results.get("test_cases", [])):
-                        with st.expander(f"Test Case {i+1}: {test_case.get('name', 'Unnamed')}"):
-                            st.markdown(f"**Prompt**: {test_case.get('prompt', '')}")
-                            st.markdown(f"**Expected Answer**: {test_case.get('expected', '')}")
-                            st.markdown(f"**Agent Output**: {test_case.get('output', '')}")
-                            st.markdown(f"**Reflection Process**: {test_case.get('reflection', '')}")
-                            st.markdown(f"**Score**: {test_case.get('score', 0)}/100")
-                else:
-                    st.error("Evaluation did not return valid results")
-            except Exception as e:
-                st.error(f"Evaluation failed: {str(e)}")
-                st.error(f"Detailed error: {traceback.format_exc()}")
-
                 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -220,58 +158,19 @@ if user_prompt := st.chat_input("Enter your question here..."):
                 st.write(resp.get("intermediate_steps"))
         st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
 
-        #############################
-        # 添加这些调试代码 DEBUG code
-        # st.write("Debug - Raw response object type:")
-        # st.write(type(resp))
-        # st.write("Debug - Response keys:")
-        # st.write(list(resp.keys()))
-        # st.write("Debug - Raw intermediate steps:")
-        # st.write(resp.get("intermediate_steps"))
-
-        # with st.chat_message("ReAct Agent"):
-        #     st.write(resp.get("output"))
-        #     with st.expander("Reasoning Steps:"):
-        #         st.write(resp.get("intermediate_steps"))
-        # st.session_state.messages.append({"role": "assistant", "content": resp.get("output")})
-
-
-
-
     with st.container():
         st.subheader("🧠 Self-Reflective Agent")
 
         final_response, final_reflection, final_trace, all_reflections = reflect_and_react(
             user_prompt, collect_reflections=True
         )
-
-        ####################################
-        # 添加这些调试代码 DEBUGcode
-        # st.write("Debug - Final response type:")
-        # st.write(type(final_response))
-        # st.write("Debug - Final response keys:")
-        # st.write(list(final_response.keys() if hasattr(final_response, 'keys') else []))
-        # st.write("Debug - Final trace type and length:")
-        # st.write(type(final_trace))
-        # st.write(len(final_trace) if isinstance(final_trace, str) else "Not a string")
-        # st.write("Debug - All reflections count:")
-        # st.write(len(all_reflections) if all_reflections else 0)
         
-        # with st.chat_message("🧠 Self-Reflective Agent"):
-        #     st.markdown("**🟡 Final Answer:**")
-        #     st.markdown(final_response.get("output"))
-
-
-
-
-
         with st.chat_message("🧠 Self-Reflective Agent"):
             st.markdown("**🟡 Final Answer:**")
             st.markdown(final_response.get("output"))
 
         with st.expander("🔍 Reasoning Trace (Final Round)"):
             st.markdown(f"```text\n{final_trace}\n```")
-
 
         with st.expander("🪞 Reflection Rounds"):
             for r in all_reflections:
@@ -287,7 +186,7 @@ if user_prompt := st.chat_input("Enter your question here..."):
                 history_text = agent.memory.buffer_as_str()
                 st.markdown(f"```text\n{history_text}\n```")
 
-
+__all__ = ["reflect_and_react"]
 
 
 
